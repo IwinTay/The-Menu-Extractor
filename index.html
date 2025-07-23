@@ -195,9 +195,9 @@
                 dom.statusEl.textContent = `Processing file ${i + 1} of ${files.length}: ${file.name}`;
                 
                 if (file.type === 'application/pdf') {
-                    await processPdf(file); // Note: PDF parsing will be basic
+                    await processPdf(file);
                 } else if (file.type.startsWith('image/')) {
-                    await processImage(file);
+                    await processImageFile(file);
                 } else {
                     console.warn(`Skipping unsupported file type: ${file.name}`);
                 }
@@ -213,11 +213,9 @@
             updateButtonStates();
         }
 
-        // --- Image Processing with AI (Refactored for Hierarchical Data) ---
-        async function processImage(file) {
-            dom.dataTable.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-gray-500"><div class="loader mx-auto"></div><p class="mt-2">Analyzing image with AI for products and modifiers...</p></td></tr>`;
-            
-            const base64ImageData = await toBase64(file);
+        // --- Core AI Processing Logic ---
+        async function processImageData(base64ImageData, mimeType, sourceName) {
+            dom.dataTable.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-gray-500"><div class="loader mx-auto"></div><p class="mt-2">Analyzing ${sourceName} with AI...</p></td></tr>`;
             
             const newPrompt = `
                 Analyze this image of a restaurant menu. Extract all products into a JSON array.
@@ -255,12 +253,12 @@
             `;
 
             const payload = {
-                contents: [{ parts: [ { text: newPrompt }, { inlineData: { mime_type: file.type, data: base64ImageData } } ] }],
+                contents: [{ parts: [ { text: newPrompt }, { inlineData: { mime_type: mimeType, data: base64ImageData } } ] }],
                 generationConfig: { "response_mime_type": "application/json" }
             };
 
             try {
-                const apiKey = "AIzaSyA108TFfQThEtfdxI2OlarxnFmivTC9K1Q"; // Provided by environment
+                const apiKey = ""; // Provided by environment
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 const response = await fetch(apiUrl, {
                     method: 'POST',
@@ -281,12 +279,18 @@
                 extractedData.push(...newData);
 
             } catch (error) {
-                handleError(`AI analysis failed for ${file.name}. Check console for details.`);
+                handleError(`AI analysis failed for ${sourceName}. Check console for details.`);
                 console.error("AI Error:", error);
             }
         }
+        
+        // --- Image File Processing ---
+        async function processImageFile(file) {
+            const base64ImageData = await toBase64(file);
+            await processImageData(base64ImageData, file.type, file.name);
+        }
 
-        // --- PDF Processing (Simplified for new structure) ---
+        // --- PDF Processing (NEW: Converts pages to images and uses AI) ---
         async function processPdf(file) {
             try {
                 const fileReader = new FileReader();
@@ -298,31 +302,30 @@
 
                 const typedarray = new Uint8Array(data);
                 const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
-                let lines = [];
+                
+                dom.statusEl.textContent = `Converting PDF to images... (0/${pdf.numPages})`;
+
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    textContent.items.forEach(item => lines.push(item.str));
+                    const viewport = page.getViewport({ scale: 2.0 }); // Higher scale for better resolution
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    
+                    const base64ImageData = canvas.toDataURL('image/jpeg').split(',')[1];
+                    
+                    dom.statusEl.textContent = `Analyzing page ${i} of ${pdf.numPages} with AI...`;
+                    
+                    await processImageData(base64ImageData, 'image/jpeg', `page ${i} of ${file.name}`);
                 }
 
-                const priceRegex = /(?:RM|\$|€)?\s*(\d+\.\d{2})$/;
-                lines.forEach(line => {
-                    const priceMatch = line.match(priceRegex);
-                    if (priceMatch) {
-                        extractedData.push({
-                            productCode: '',
-                            productName: line.substring(0, priceMatch.index).trim(),
-                            basePrice: parseFloat(priceMatch[1]),
-                            productCategory: 'Uncategorized',
-                            printer: '',
-                            modifiers: [],
-                            selected: false
-                        });
-                    }
-                });
-
             } catch (error) {
-                handleError(`Error reading PDF: ${file.name}`);
+                handleError(`Error processing PDF: ${file.name}`);
+                console.error("PDF Processing Error:", error);
             }
         }
 
@@ -337,7 +340,7 @@
             dom.statusEl.textContent = message;
         }
 
-        // --- Table Rendering and Editing (Refactored for Hierarchical Data) ---
+        // --- Table Rendering and Editing ---
         function renderTable() {
             dom.dataTable.innerHTML = '';
             if (extractedData.length === 0) {
