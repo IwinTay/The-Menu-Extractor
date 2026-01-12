@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Menu Extractor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- PDF.js Library -->
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.mjs" type="module"></script>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)" rel="stylesheet">
+    
+    <script src="[https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs](https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs)" type="module"></script>
+    
     <style>
         body { font-family: 'Inter', sans-serif; }
         #upload-box.dragover {
@@ -33,26 +34,13 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .highlight-warning {
-            background-color: #fef9c3; /* yellow-100 */
-        }
-        #table-container {
-             overflow-x: auto;
-        }
-        /* Styles for the new hierarchical table */
         .product-row td {
-            background-color: #f9fafb; /* gray-50 */
+            background-color: #f9fafb;
             font-weight: 600;
         }
-        .modifier-row td {
-            padding-left: 2rem; /* Indent modifier rows */
-        }
-        .option-row td {
-             padding-left: 4rem; /* Indent option rows */
-        }
-        .sub-row-cell {
-            border-left: 2px solid #e5e7eb; /* gray-200 */
-        }
+        .modifier-row td { padding-left: 2rem; }
+        .option-row td { padding-left: 4rem; }
+        .sub-row-cell { border-left: 2px solid #e5e7eb; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -63,7 +51,6 @@
             <p class="text-gray-600 mt-2">Upload menus to extract products and their modifiers.</p>
         </header>
 
-        <!-- Section 1: Upload & History -->
         <div class="mb-8">
             <h2 class="text-2xl font-bold text-gray-900 mb-4 border-b pb-2">1. Upload & Session History</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -71,14 +58,11 @@
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Upload Files</h3>
                     <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden" multiple>
                     <label for="file-input" id="upload-box" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h5l4 4v5a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 17.657L13.414 21.9a2 2 0 01-2.827 0L7 17.657M10 14l2-2m0 0l2-2m-2 2v4"></path></svg>
+                        <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h5l4 4v5a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 17.657L13.414 21.9a2 2 0 01-2.827 0L7 17.657M10 14l2-2m0 0l2-2m-2 2v4"></path></svg>
                         <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag & drop</p>
                         <p class="text-xs text-gray-500">PDF, JPG, PNG (Multiple files allowed)</p>
                     </label>
                     <div id="status" class="mt-4 text-sm text-center"></div>
-                    <div id="progress-bar-container" class="w-full bg-gray-200 rounded-full h-2.5 mt-2 hidden">
-                        <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
-                    </div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-md h-full">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Session History</h3>
@@ -89,7 +73,6 @@
             </div>
         </div>
 
-        <!-- Section 2: Verify & Edit -->
         <div class="mb-8">
             <div class="bg-white p-6 rounded-xl shadow-md h-full flex flex-col">
                 <div class="flex justify-between items-center mb-4">
@@ -107,13 +90,13 @@
                                 <th class="p-2 w-6"><input type="checkbox" id="select-all-checkbox"></th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product Name</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product Category</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Base Price (RM)</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Base Price</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Printer</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Modifier Name</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Modifier Type</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Modifier Option</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Additional Price</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Option</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Add. Price</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
                         </thead>
@@ -124,18 +107,15 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Section 3: Export Panel -->
+
         <div class="mt-8">
             <div class="bg-white p-6 rounded-xl shadow-md">
                  <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Export</h2>
-                 <p class="text-sm text-gray-600 mb-4">Once you've verified the data, click the button below to download your cleaned data as a CSV file.</p>
                  <button id="export-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-300 text-lg" disabled>Export to CSV</button>
             </div>
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
     <div id="confirmation-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
         <div id="confirmation-modal" class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-auto transform transition-all scale-95 opacity-0">
             <h3 id="confirmation-modal-title" class="text-lg font-bold text-gray-900">Confirm Action</h3>
@@ -149,14 +129,15 @@
 
     <script type="module">
         // --- PDF.js Setup ---
-        const { pdfjsLib } = globalThis;
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://mozilla.github.io/pdf.js/build/pdf.worker.mjs`;
+        import * as pdfjsLib from '[https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs](https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs)';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs`;
 
-        // --- State Management ---
-        let extractedData = []; // Now stores an array of product objects
+        // --- State ---
+        let extractedData = [];
         let sessionHistory = [];
+        const API_KEY = "YAIzaSyBW3QyNrmL5_EGOa-ks35Hb0Ea8dMKcy2c"; // REPLACE THIS WITH A VALID KEY
 
-        // --- DOM References ---
+        // --- DOM ---
         const dom = {
             uploadBox: document.getElementById('upload-box'),
             fileInput: document.getElementById('file-input'),
@@ -167,8 +148,6 @@
             clearListBtn: document.getElementById('clear-list-btn'),
             deleteSelectedProductsBtn: document.getElementById('delete-selected-products-btn'),
             selectAllCheckbox: document.getElementById('select-all-checkbox'),
-            progressBarContainer: document.getElementById('progress-bar-container'),
-            progressBar: document.getElementById('progress-bar'),
             sessionHistoryList: document.getElementById('session-history-list'),
             confirmationModalBackdrop: document.getElementById('confirmation-modal-backdrop'),
             confirmationModal: document.getElementById('confirmation-modal'),
@@ -178,7 +157,7 @@
             confirmationModalConfirmBtn: document.getElementById('confirmation-modal-confirm-btn'),
         };
 
-        // --- File Upload Handling ---
+        // --- Handlers ---
         dom.fileInput.addEventListener('change', (e) => handleFileBatch(e.target.files));
         dom.uploadBox.addEventListener('dragover', (e) => { e.preventDefault(); dom.uploadBox.classList.add('dragover'); });
         dom.uploadBox.addEventListener('dragleave', () => dom.uploadBox.classList.remove('dragover'));
@@ -186,146 +165,85 @@
         
         async function handleFileBatch(files) {
             if (!files || files.length === 0) return;
-            
             resetUI();
-            extractedData = []; // Clear previous results
+            extractedData = [];
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                dom.statusEl.textContent = `Processing file ${i + 1} of ${files.length}: ${file.name}`;
-                
+                dom.statusEl.textContent = `Processing ${file.name}...`;
                 if (file.type === 'application/pdf') {
                     await processPdf(file);
                 } else if (file.type.startsWith('image/')) {
                     await processImageFile(file);
-                } else {
-                    console.warn(`Skipping unsupported file type: ${file.name}`);
                 }
             }
             
             saveNewSession(files.length);
-            dom.statusEl.textContent = `Extracted ${extractedData.length} total products from ${files.length} file(s). Please verify.`;
+            dom.statusEl.textContent = `Processing complete.`;
             renderTable();
         }
         
         function resetUI() {
-            dom.dataTable.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-gray-500">Reading files...</td></tr>';
+            dom.dataTable.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-gray-500"><div class="loader mx-auto"></div></td></tr>';
             updateButtonStates();
         }
 
-        // --- Core AI Processing Logic ---
         async function processImageData(base64ImageData, mimeType, sourceName) {
-            dom.dataTable.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-gray-500"><div class="loader mx-auto"></div><p class="mt-2">Analyzing ${sourceName} with AI...</p></td></tr>`;
-            
-            const newPrompt = `
-                Analyze this image of a restaurant menu. Extract all products into a JSON array.
-                Each object in the array should represent a single product and follow this structure:
-                {
-                  "productCode": "The alphanumeric code for the product (e.g., A1, B2).",
-                  "productName": "The name of the product. If it has an English and Chinese name, combine them in the format 'English Name (Chinese Name)'.",
-                  "productCategory": "The category of the product (e.g., Pasta, Drinks). Infer if not stated.",
-                  "basePrice": "The base price of the product. This can be a number or a string.",
-                  "printer": "The designated printer (e.g., Food, Beverages). Infer if possible.",
-                  "modifiers": [
-                    {
-                      "modifierName": "Name of the modifier group (e.g., Spice Level, Add-ons, Size)",
-                      "modifierType": "Type of selection (e.g., Single Choice, Multiple Choice)",
-                      "options": [
-                        {
-                          "modifierOption": "The name of the specific option (e.g., Mild, Add Egg, Small)",
-                          "additionalPrice": "The price for this option as a number. Can be 0."
-                        }
-                      ]
-                    }
-                  ]
-                }
-                
-                **SPECIAL INSTRUCTIONS FOR PRICING:**
-
-                1.  **SEASONAL PRICE:** If a product's price is marked "Seasonal Price" and there is a number next to it (e.g., "Seasonal Price 60"), the value for the 'basePrice' field MUST be the combined string, e.g., "Seasonal Price 60". If there is no number, use the string "Seasonal Price".
-
-                2.  **MULTIPLE PRICES (SIZES):** When a product has multiple prices without labels (e.g., "Noodle RM 18, 28, 38"), you MUST interpret this as different sizes.
-                    - Set the 'basePrice' to the LOWEST price (e.g., 18).
-                    - ALWAYS create a "Size" modifier with 'modifierType': "Single Choice".
-                    - Create an option for EACH price, including the base one. The first option's 'additionalPrice' MUST be 0.
-                    - Calculate 'additionalPrice' for other options as (Option Price - basePrice).
-                    - PRIORITIZE menu labels like (S), (M), (L) for option names. If none, infer "Small", "Medium", "Large".
-            `;
+            const prompt = `Analyze this menu. Return a JSON array of products. Structure: {productCode, productName, productCategory, basePrice, printer, modifiers: [{modifierName, modifierType, options: [{modifierOption, additionalPrice}]}]}. If multiple prices exist for sizes, set basePrice to lowest and use a "Size" modifier.`;
 
             const payload = {
-                contents: [{ parts: [ { text: newPrompt }, { inlineData: { mime_type: mimeType, data: base64ImageData } } ] }],
+                contents: [{ parts: [{ text: prompt }, { inlineData: { mime_type: mimeType, data: base64ImageData } }] }],
                 generationConfig: { "response_mime_type": "application/json" }
             };
 
             try {
-                const apiKey = "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"; // Provided by environment
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                const response = await fetch(apiUrl, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-
                 const result = await response.json();
-                if (!result.candidates || !result.candidates[0].content.parts[0].text) throw new Error("AI response was empty.");
+                if (result.error) throw new Error(result.error.message);
                 
-                let rawText = result.candidates[0].content.parts[0].text;
-                let cleanedText = rawText.trim().match(/```json\s*([\s\S]*?)\s*```/)?.[1] || rawText;
-                
+                const rawText = result.candidates[0].content.parts[0].text;
+                // Clean markdown if AI included it despite config
+                const cleanedText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
                 const data = JSON.parse(cleanedText);
-                const newData = data.map(product => ({ ...product, selected: false, modifiers: product.modifiers || [] }));
-                extractedData.push(...newData);
-
+                
+                extractedData.push(...data.map(p => ({ ...p, selected: false, modifiers: p.modifiers || [] })));
+                renderTable(); // Render as we go
             } catch (error) {
-                handleError(`AI analysis failed for ${sourceName}. Check console for details.`);
                 console.error("AI Error:", error);
+                dom.statusEl.textContent = "Error: " + error.message;
             }
         }
         
-        // --- Image File Processing ---
         async function processImageFile(file) {
-            const base64ImageData = await toBase64(file);
-            await processImageData(base64ImageData, file.type, file.name);
+            const base64 = await toBase64(file);
+            await processImageData(base64, file.type, file.name);
         }
 
-        // --- PDF Processing (NEW: Converts pages to images and uses AI) ---
         async function processPdf(file) {
             try {
-                const fileReader = new FileReader();
-                const data = await new Promise((resolve, reject) => {
-                    fileReader.onload = () => resolve(fileReader.result);
-                    fileReader.onerror = reject;
-                    fileReader.readAsArrayBuffer(file);
-                });
-
-                const typedarray = new Uint8Array(data);
-                const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
-                
-                dom.statusEl.textContent = `Converting PDF to images... (0/${pdf.numPages})`;
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
                 for (let i = 1; i <= pdf.numPages; i++) {
+                    dom.statusEl.textContent = `Reading PDF page ${i}/${pdf.numPages}...`;
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 2.0 }); // Higher scale for better resolution
-                    
+                    const viewport = page.getViewport({ scale: 2.0 });
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
 
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    
-                    const base64ImageData = canvas.toDataURL('image/jpeg').split(',')[1];
-                    
-                    dom.statusEl.textContent = `Analyzing page ${i} of ${pdf.numPages} with AI...`;
-                    
-                    await processImageData(base64ImageData, 'image/jpeg', `page ${i} of ${file.name}`);
+                    const base64 = canvas.toDataURL('image/jpeg').split(',')[1];
+                    await processImageData(base64, 'image/jpeg', `page ${i}`);
                 }
-
             } catch (error) {
-                handleError(`Error processing PDF: ${file.name}`);
-                console.error("PDF Processing Error:", error);
+                console.error("PDF Error:", error);
             }
         }
 
@@ -333,319 +251,148 @@
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = error => reject(error);
+            reader.onerror = e => reject(e);
         });
-        
-        function handleError(message) {
-            dom.statusEl.textContent = message;
-        }
 
-        // --- Table Rendering and Editing ---
+        // --- Table Logic ---
         function renderTable() {
             dom.dataTable.innerHTML = '';
             if (extractedData.length === 0) {
-                dom.dataTable.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-gray-500">No items found. Upload a file or add a product manually.</td></tr>';
+                dom.dataTable.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-gray-500">No data.</td></tr>';
                 updateButtonStates();
                 return;
             }
 
-            extractedData.forEach((product, productIndex) => {
-                const totalRowsForProduct = product.modifiers.reduce((acc, mod) => acc + (mod.options.length || 1), 0) || 1;
-                
-                const productRow = document.createElement('tr');
-                productRow.className = 'product-row';
-                let productRowHTML = `
-                    <td class="p-2 border-b border-gray-200 text-center" rowspan="${totalRowsForProduct}">
-                        <input type="checkbox" class="product-checkbox" data-product-index="${productIndex}" ${product.selected ? 'checked' : ''}>
-                    </td>
-                    <td class="p-2 border-b border-gray-200" rowspan="${totalRowsForProduct}"><div contenteditable="true" data-field="productCode" data-product-index="${productIndex}">${product.productCode || ''}</div></td>
-                    <td class="p-2 border-b border-gray-200" rowspan="${totalRowsForProduct}"><div contenteditable="true" data-field="productName" data-product-index="${productIndex}">${product.productName || ''}</div></td>
-                    <td class="p-2 border-b border-gray-200" rowspan="${totalRowsForProduct}"><div contenteditable="true" data-field="productCategory" data-product-index="${productIndex}">${product.productCategory || ''}</div></td>
-                    <td class="p-2 border-b border-gray-200" rowspan="${totalRowsForProduct}"><div contenteditable="true" data-field="basePrice" data-product-index="${productIndex}">${product.basePrice ?? ''}</div></td>
-                    <td class="p-2 border-b border-gray-200" rowspan="${totalRowsForProduct}"><div contenteditable="true" data-field="printer" data-product-index="${productIndex}">${product.printer || ''}</div></td>
-                `;
+            extractedData.forEach((product, pIdx) => {
+                const rows = product.modifiers.reduce((acc, m) => acc + (m.options.length || 1), 0) || 1;
+                let firstRow = true;
 
-                if (product.modifiers.length > 0 && product.modifiers[0].options.length > 0) {
-                    const firstModifier = product.modifiers[0];
-                    const firstOption = firstModifier.options[0];
-                    productRowHTML += createModifierCells(productIndex, 0, 0, firstModifier, firstOption);
+                if (product.modifiers.length === 0) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-2 border-b text-center"><input type="checkbox" class="product-checkbox" data-p="${pIdx}" ${product.selected ? 'checked' : ''}></td>
+                        <td class="p-2 border-b"><div contenteditable="true" data-f="productCode" data-p="${pIdx}">${product.productCode || ''}</div></td>
+                        <td class="p-2 border-b"><div contenteditable="true" data-f="productName" data-p="${pIdx}">${product.productName || ''}</div></td>
+                        <td class="p-2 border-b"><div contenteditable="true" data-f="productCategory" data-p="${pIdx}">${product.productCategory || ''}</div></td>
+                        <td class="p-2 border-b"><div contenteditable="true" data-f="basePrice" data-p="${pIdx}">${product.basePrice || ''}</div></td>
+                        <td class="p-2 border-b"><div contenteditable="true" data-f="printer" data-p="${pIdx}">${product.printer || ''}</div></td>
+                        <td colspan="4" class="p-2 border-b"></td>
+                        <td class="p-2 border-b"><button class="add-modifier-btn text-blue-600" data-p="${pIdx}">+ Mod</button></td>
+                    `;
+                    dom.dataTable.appendChild(tr);
                 } else {
-                     productRowHTML += `<td colspan="4"></td>`;
-                     productRowHTML += createActionCell(productIndex);
-                }
-                productRow.innerHTML = productRowHTML;
-                dom.dataTable.appendChild(productRow);
-
-                let isFirstModifierRow = true;
-                product.modifiers.forEach((modifier, modifierIndex) => {
-                    modifier.options.forEach((option, optionIndex) => {
-                        if (isFirstModifierRow && optionIndex === 0) {
-                            return; 
-                        }
-                        const optionRow = document.createElement('tr');
-                        optionRow.className = 'option-row';
-                        optionRow.innerHTML = createModifierCells(productIndex, modifierIndex, optionIndex, modifier, option);
-                        dom.dataTable.appendChild(optionRow);
+                    product.modifiers.forEach((mod, mIdx) => {
+                        mod.options.forEach((opt, oIdx) => {
+                            const tr = document.createElement('tr');
+                            let html = '';
+                            if (firstRow) {
+                                html += `
+                                    <td class="p-2 border-b text-center" rowspan="${rows}"><input type="checkbox" class="product-checkbox" data-p="${pIdx}" ${product.selected ? 'checked' : ''}></td>
+                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="productCode" data-p="${pIdx}">${product.productCode || ''}</div></td>
+                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="productName" data-p="${pIdx}">${product.productName || ''}</div></td>
+                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="productCategory" data-p="${pIdx}">${product.productCategory || ''}</div></td>
+                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="basePrice" data-p="${pIdx}">${product.basePrice || ''}</div></td>
+                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="printer" data-p="${pIdx}">${product.printer || ''}</div></td>
+                                `;
+                            }
+                            html += `
+                                <td class="p-2 border-b sub-row-cell"><div contenteditable="true" data-f="modifierName" data-p="${pIdx}" data-m="${mIdx}">${mod.modifierName || ''}</div></td>
+                                <td class="p-2 border-b"><div contenteditable="true" data-f="modifierType" data-p="${pIdx}" data-m="${mIdx}">${mod.modifierType || ''}</div></td>
+                                <td class="p-2 border-b"><div contenteditable="true" data-f="modifierOption" data-p="${pIdx}" data-m="${mIdx}" data-o="${oIdx}">${opt.modifierOption || ''}</div></td>
+                                <td class="p-2 border-b"><div contenteditable="true" data-f="additionalPrice" data-p="${pIdx}" data-m="${mIdx}" data-o="${oIdx}">${opt.additionalPrice || '0'}</div></td>
+                                <td class="p-2 border-b">
+                                    ${firstRow ? `<button class="add-modifier-btn text-xs text-blue-600" data-p="${pIdx}">+M</button>` : ''}
+                                    <button class="add-option-btn text-xs text-green-600" data-p="${pIdx}" data-m="${mIdx}">+O</button>
+                                </td>
+                            `;
+                            tr.innerHTML = html;
+                            dom.dataTable.appendChild(tr);
+                            firstRow = false;
+                        });
                     });
-                    isFirstModifierRow = false;
-                });
+                }
             });
-
             updateButtonStates();
         }
 
-        function createModifierCells(pIndex, mIndex, oIndex, modifier, option) {
-            return `
-                <td class="p-2 border-b border-gray-200 sub-row-cell"><div contenteditable="true" data-field="modifierName" data-product-index="${pIndex}" data-modifier-index="${mIndex}">${modifier.modifierName || ''}</div></td>
-                <td class="p-2 border-b border-gray-200"><div contenteditable="true" data-field="modifierType" data-product-index="${pIndex}" data-modifier-index="${mIndex}">${modifier.modifierType || ''}</div></td>
-                <td class="p-2 border-b border-gray-200"><div contenteditable="true" data-field="modifierOption" data-product-index="${pIndex}" data-modifier-index="${mIndex}" data-option-index="${oIndex}">${option.modifierOption || ''}</div></td>
-                <td class="p-2 border-b border-gray-200"><div contenteditable="true" data-field="additionalPrice" data-product-index="${pIndex}" data-modifier-index="${mIndex}" data-option-index="${oIndex}">${option.additionalPrice ?? '0.00'}</div></td>
-                ${createActionCell(pIndex, mIndex, oIndex)}
-            `;
-        }
-
-        function createActionCell(pIndex, mIndex, oIndex) {
-             const isProductLevel = typeof mIndex === 'undefined';
-             return `<td class="p-2 border-b border-gray-200 space-x-1">
-                        ${isProductLevel ? `<button class="add-modifier-btn text-xs bg-blue-100 text-blue-800 px-1 rounded" data-product-index="${pIndex}">+M</button>` : ''}
-                        ${!isProductLevel ? `<button class="add-option-btn text-xs bg-green-100 text-green-800 px-1 rounded" data-product-index="${pIndex}" data-modifier-index="${mIndex}">+O</button>` : ''}
-                        ${!isProductLevel ? `<button class="delete-option-btn text-xs bg-red-100 text-red-800 px-1 rounded" data-product-index="${pIndex}" data-modifier-index="${mIndex}" data-option-index="${oIndex}">-</button>` : ''}
-                    </td>`;
-        }
-
-
+        // --- Persistence & UI Helpers ---
         function updateButtonStates() {
             const hasData = extractedData.length > 0;
             dom.exportBtn.disabled = !hasData;
             dom.clearListBtn.disabled = !hasData;
             dom.addProductBtn.disabled = false;
-            
-            const selectedCount = extractedData.filter(p => p.selected).length;
-            dom.deleteSelectedProductsBtn.disabled = selectedCount === 0;
-            dom.selectAllCheckbox.checked = hasData && selectedCount === extractedData.length;
+            dom.deleteSelectedProductsBtn.disabled = !extractedData.some(p => p.selected);
         }
 
         dom.dataTable.addEventListener('input', (e) => {
-            const target = e.target;
-            if (target.hasAttribute('contenteditable')) {
-                const { field, productIndex, modifierIndex, optionIndex } = target.dataset;
-                let value = target.textContent;
-                let dataObject;
-
-                if (optionIndex !== undefined) {
-                    dataObject = extractedData[productIndex].modifiers[modifierIndex].options[optionIndex];
-                } else if (modifierIndex !== undefined) {
-                    dataObject = extractedData[productIndex].modifiers[modifierIndex];
-                } else {
-                    dataObject = extractedData[productIndex];
-                }
-
-                if (field === 'basePrice' || field === 'additionalPrice') {
-                    if (typeof value === 'string' && value.toLowerCase().includes('seasonal')) {
-                        dataObject[field] = value;
-                    } else {
-                        dataObject[field] = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
-                    }
-                } else {
-                    dataObject[field] = value;
-                }
-            }
+            const { f, p, m, o } = e.target.dataset;
+            let val = e.target.textContent;
+            if (o !== undefined) extractedData[p].modifiers[m].options[o][f] = val;
+            else if (m !== undefined) extractedData[p].modifiers[m][f] = val;
+            else extractedData[p][f] = val;
         });
 
         dom.dataTable.addEventListener('click', (e) => {
-            const button = e.target;
-            const { productIndex, modifierIndex, optionIndex } = button.dataset;
-
-            if (button.classList.contains('add-modifier-btn')) {
-                extractedData[productIndex].modifiers.push({ modifierName: 'New Modifier', modifierType: 'Single Choice', options: [{ modifierOption: 'New Option', additionalPrice: 0 }] });
+            const btn = e.target;
+            const { p, m } = btn.dataset;
+            if (btn.classList.contains('add-modifier-btn')) {
+                extractedData[p].modifiers.push({ modifierName: 'New Mod', modifierType: 'Single', options: [{ modifierOption: 'New Opt', additionalPrice: 0 }] });
                 renderTable();
-            } else if (button.classList.contains('add-option-btn')) {
-                extractedData[productIndex].modifiers[modifierIndex].options.push({ modifierOption: 'New Option', additionalPrice: 0 });
-                renderTable();
-            } else if (button.classList.contains('delete-option-btn')) {
-                const modifier = extractedData[productIndex].modifiers[modifierIndex];
-                modifier.options.splice(optionIndex, 1);
-                if (modifier.options.length === 0) {
-                    extractedData[productIndex].modifiers.splice(modifierIndex, 1);
-                }
+            } else if (btn.classList.contains('add-option-btn')) {
+                extractedData[p].modifiers[m].options.push({ modifierOption: 'New Opt', additionalPrice: 0 });
                 renderTable();
             }
         });
 
         dom.dataTable.addEventListener('change', (e) => {
             if (e.target.classList.contains('product-checkbox')) {
-                const { productIndex } = e.target.dataset;
-                extractedData[productIndex].selected = e.target.checked;
+                extractedData[e.target.dataset.p].selected = e.target.checked;
                 updateButtonStates();
             }
         });
-        
-        dom.selectAllCheckbox.addEventListener('change', (e) => {
-            extractedData.forEach(p => p.selected = e.target.checked);
-            renderTable();
-        });
 
-        dom.addProductBtn.addEventListener('click', () => {
-            extractedData.unshift({ productCode: '', productName: 'New Product', basePrice: 0.00, productCategory: '', printer: '', modifiers: [], selected: false });
-            renderTable();
-        });
-
-        dom.clearListBtn.addEventListener('click', () => {
-            showConfirmationModal('Clear Entire List', 'Are you sure you want to clear all extracted products?', () => {
-                extractedData = [];
-                renderTable();
-                dom.statusEl.textContent = 'List cleared.';
+        dom.exportBtn.addEventListener('click', () => {
+            let csv = "Code,Product,Category,Price,Printer,Modifier,Type,Option,AddPrice\n";
+            extractedData.forEach(p => {
+                const base = `"${p.productCode}","${p.productName}","${p.productCategory}","${p.basePrice}","${p.printer}"`;
+                if (p.modifiers.length === 0) csv += base + ",,,,\n";
+                else p.modifiers.forEach(m => m.options.forEach(o => {
+                    csv += `${base},"${m.modifierName}","${m.modifierType}","${o.modifierOption}","${o.additionalPrice}"\n`;
+                }));
             });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'menu.csv';
+            a.click();
         });
-        
-        dom.deleteSelectedProductsBtn.addEventListener('click', () => {
-            const selectedCount = extractedData.filter(p => p.selected).length;
-            if (selectedCount === 0) return;
-            
-            showConfirmationModal('Delete Selected Products', `Are you sure you want to delete ${selectedCount} product(s)?`, () => {
-                extractedData = extractedData.filter(p => !p.selected);
-                renderTable();
-            });
-        });
-        
-        function loadSessions() {
-            try {
-                const saved = localStorage.getItem('menuExtractorSessions');
-                sessionHistory = saved ? JSON.parse(saved) : [];
-            } catch (e) { console.error("Could not load sessions:", e); sessionHistory = []; }
-        }
 
-        function saveSessions() {
-            try {
-                localStorage.setItem('menuExtractorSessions', JSON.stringify(sessionHistory));
-            } catch (e) { console.error("Could not save sessions:", e); }
-        }
-
-        function saveNewSession(fileCount) {
+        function saveNewSession() {
             if (extractedData.length === 0) return;
-            const now = new Date();
-            const newSession = {
-                id: now.getTime(),
-                name: `Session from ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`,
-                fileCount: fileCount,
-                itemCount: extractedData.length,
-                data: JSON.parse(JSON.stringify(extractedData))
-            };
-            sessionHistory.unshift(newSession);
-            if (sessionHistory.length > 10) sessionHistory.pop();
-            saveSessions();
+            const session = { id: Date.now(), name: new Date().toLocaleString(), data: JSON.parse(JSON.stringify(extractedData)), itemCount: extractedData.length };
+            sessionHistory.unshift(session);
+            localStorage.setItem('menuSessions', JSON.stringify(sessionHistory.slice(0, 5)));
             renderHistory();
         }
 
         function renderHistory() {
-            dom.sessionHistoryList.innerHTML = '';
-            if (sessionHistory.length === 0) {
-                dom.sessionHistoryList.innerHTML = '<p class="text-sm text-gray-500 text-center">No saved sessions yet.</p>';
-                return;
-            }
-            sessionHistory.forEach(session => {
-                const sessionEl = document.createElement('div');
-                sessionEl.className = 'p-2 border rounded-md hover:bg-gray-50 transition-colors';
-                sessionEl.innerHTML = `<div class="font-semibold text-sm">${session.name}</div>
-                    <div class="text-xs text-gray-500">${session.itemCount} products</div>
-                    <div class="flex space-x-2 mt-2">
-                        <button class="load-session-btn text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-md hover:bg-blue-200" data-id="${session.id}">Load</button>
-                        <button class="delete-session-btn text-xs bg-red-100 text-red-800 px-2 py-1 rounded-md hover:bg-red-200" data-id="${session.id}">Delete</button>
-                    </div>`;
-                dom.sessionHistoryList.appendChild(sessionEl);
-            });
+            const saved = localStorage.getItem('menuSessions');
+            sessionHistory = saved ? JSON.parse(saved) : [];
+            dom.sessionHistoryList.innerHTML = sessionHistory.map(s => `
+                <div class="p-2 border rounded flex justify-between items-center">
+                    <span class="text-xs font-medium">${s.name} (${s.itemCount})</span>
+                    <button onclick="window.loadSess(${s.id})" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Load</button>
+                </div>
+            `).join('') || '<p class="text-center text-gray-400">No history</p>';
         }
 
-        dom.sessionHistoryList.addEventListener('click', (e) => {
-            const button = e.target;
-            const sessionId = button.dataset.id;
-            if (!sessionId) return;
-            const sessionIndex = sessionHistory.findIndex(s => s.id == sessionId);
-            if (sessionIndex === -1) return;
+        window.loadSess = (id) => {
+            const s = sessionHistory.find(x => x.id === id);
+            if (s) { extractedData = s.data; renderTable(); }
+        };
 
-            if (button.classList.contains('load-session-btn')) {
-                extractedData = JSON.parse(JSON.stringify(sessionHistory[sessionIndex].data));
-                renderTable();
-                dom.statusEl.textContent = `Loaded session: ${sessionHistory[sessionIndex].name}`;
-            } else if (button.classList.contains('delete-session-btn')) {
-                showConfirmationModal('Delete Session', `Are you sure you want to delete "${sessionHistory[sessionIndex].name}"?`, () => {
-                    sessionHistory.splice(sessionIndex, 1);
-                    saveSessions();
-                    renderHistory();
-                });
-            }
-        });
-
-        let confirmCallback = null;
-        dom.confirmationModalConfirmBtn.addEventListener('click', () => {
-            if (confirmCallback) confirmCallback();
-            hideConfirmationModal();
-        });
-        dom.confirmationModalCancelBtn.addEventListener('click', () => hideConfirmationModal());
-
-        function showConfirmationModal(title, message, onConfirm) {
-            dom.confirmationModalTitle.textContent = title;
-            dom.confirmationModalMessage.textContent = message;
-            confirmCallback = onConfirm;
-            dom.confirmationModalBackdrop.classList.remove('hidden');
-            setTimeout(() => dom.confirmationModal.classList.remove('scale-95', 'opacity-0'), 10);
-        }
-
-        function hideConfirmationModal() {
-            dom.confirmationModal.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => dom.confirmationModalBackdrop.classList.add('hidden'), 200);
-        }
-
-        dom.exportBtn.addEventListener('click', () => {
-            if (extractedData.length === 0) return;
-
-            const headers = ["Product Code", "Product Name", "Product Category", "Base Price (RM)", "Printer", "Modifier Name", "Modifier Type", "Modifier Option", "Additional Price"];
-            const csvRows = [headers.join(',')];
-
-            extractedData.forEach(product => {
-                if (product.modifiers && product.modifiers.length > 0) {
-                    product.modifiers.forEach(modifier => {
-                        if (modifier.options && modifier.options.length > 0) {
-                            modifier.options.forEach(option => {
-                                const rowData = [
-                                    product.productCode || '',
-                                    product.productName || '',
-                                    product.productCategory || '',
-                                    product.basePrice ?? '',
-                                    product.printer || '',
-                                    modifier.modifierName || '',
-                                    modifier.modifierType || '',
-                                    option.modifierOption || '',
-                                    option.additionalPrice ?? ''
-                                ];
-                                csvRows.push(rowData.map(d => `"${String(d).replace(/"/g, '""')}"`).join(','));
-                            });
-                        }
-                    });
-                } else {
-                    const rowData = [product.productCode || '', product.productName || '', product.productCategory || '', product.basePrice ?? '', product.printer || '', '', '', '', ''];
-                    csvRows.push(rowData.map(d => `"${String(d).replace(/"/g, '""')}"`).join(','));
-                }
-            });
-
-            const csvString = csvRows.join('\r\n');
-            const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(csvString);
-
-            const link = document.createElement("a");
-            link.setAttribute("href", csvContent);
-            link.setAttribute("download", "menu_data_with_modifiers.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-        
-        function main() {
-            loadSessions();
-            renderHistory();
-            updateButtonStates();
-        }
-        main();
-
+        renderHistory();
     </script>
 </body>
 </html>
