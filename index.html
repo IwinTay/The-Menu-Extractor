@@ -3,396 +3,542 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Menu Extractor</title>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)" rel="stylesheet">
-    
-    <script src="[https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs](https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs)" type="module"></script>
-    
+    <title>The Menu Extractor | AI-Powered Data Extraction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PDF.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs" type="module"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        #upload-box.dragover {
-            border-color: #4f46e5;
-            background-color: #eef2ff;
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .drag-active {
+            border-color: #4f46e5 !important;
+            background-color: #f5f3ff !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
         [contenteditable]:focus {
-            outline: 2px solid #4f46e5;
-            background-color: #eef2ff;
-        }
-        #bulk-action-bar.hidden, #progress-bar-container.hidden, #confirmation-modal-backdrop.hidden {
-            display: none;
+            outline: 2px solid #6366f1;
+            background: #fff;
+            border-radius: 4px;
         }
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4f46e5;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #6366f1;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .product-row td {
-            background-color: #f9fafb;
-            font-weight: 600;
-        }
-        .modifier-row td { padding-left: 2rem; }
-        .option-row td { padding-left: 4rem; }
-        .sub-row-cell { border-left: 2px solid #e5e7eb; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="min-h-screen">
 
-    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-7xl">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">The Menu Extractor</h1>
-            <p class="text-gray-600 mt-2">Upload menus to extract products and their modifiers.</p>
-        </header>
-
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4 border-b pb-2">1. Upload & Session History</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-white p-6 rounded-xl shadow-md h-full">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Upload Files</h3>
-                    <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden" multiple>
-                    <label for="file-input" id="upload-box" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h5l4 4v5a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 17.657L13.414 21.9a2 2 0 01-2.827 0L7 17.657M10 14l2-2m0 0l2-2m-2 2v4"></path></svg>
-                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag & drop</p>
-                        <p class="text-xs text-gray-500">PDF, JPG, PNG (Multiple files allowed)</p>
-                    </label>
-                    <div id="status" class="mt-4 text-sm text-center"></div>
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-indigo-600 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-md h-full">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Session History</h3>
-                    <div id="session-history-list" class="space-y-2 max-h-96 overflow-y-auto">
-                        <p class="text-sm text-gray-500 text-center">No saved sessions yet.</p>
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Menu Extractor</h1>
+            </div>
+            <div id="global-actions" class="flex gap-3">
+                <button id="export-btn" disabled class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-semibold transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export CSV
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6 space-y-8">
+        
+        <!-- Header Controls -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Upload Area -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">1. Upload Menu Files</h2>
+                <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-indigo-400 transition-all cursor-pointer bg-slate-50">
+                    <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg" class="hidden">
+                    <div class="space-y-4">
+                        <div class="bg-indigo-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h5l4 4v5a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11l2 2m0 0l2-2m-2 2v4"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-slate-900 font-semibold">Click or drag files here</p>
+                            <p class="text-slate-500 text-sm">PDF, PNG, JPG (Multi-page PDF supported)</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="mb-8">
-            <div class="bg-white p-6 rounded-xl shadow-md h-full flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-gray-900">2. Verify & Edit Data</h2>
-                    <div class="flex items-center space-x-2">
-                        <button id="delete-selected-products-btn" class="text-sm bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600 disabled:bg-gray-300" disabled>Delete Selected</button>
-                        <button id="clear-list-btn" class="text-sm bg-gray-500 text-white py-1 px-3 rounded-lg hover:bg-gray-600 disabled:bg-gray-300" disabled>Clear List</button>
-                        <button id="add-product-btn" class="text-sm bg-indigo-500 text-white py-1 px-3 rounded-lg hover:bg-indigo-600 disabled:bg-gray-300" disabled>+ Product</button>
-                    </div>
+                <div id="status-bar" class="mt-4 hidden flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <div class="loader"></div>
+                    <span id="status-text" class="text-sm text-slate-600">Processing...</span>
                 </div>
-                <div id="table-container" class="overflow-auto max-h-[60vh] flex-grow">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-gray-100 sticky top-0">
-                            <tr>
-                                <th class="p-2 w-6"><input type="checkbox" id="select-all-checkbox"></th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product Name</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Base Price</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Printer</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Modifier Name</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Option</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Add. Price</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-table" class="divide-y divide-gray-200">
-                            <tr><td colspan="11" class="p-4 text-center text-gray-500">Upload one or more files to begin.</td></tr>
-                        </tbody>
-                    </table>
+            </div>
+
+            <!-- History Sidebar -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Recent Sessions</h2>
+                <div id="history-list" class="space-y-3 max-h-[160px] overflow-y-auto custom-scrollbar">
+                    <p class="text-slate-400 text-sm italic">No recent sessions found.</p>
                 </div>
             </div>
         </div>
 
-        <div class="mt-8">
-            <div class="bg-white p-6 rounded-xl shadow-md">
-                 <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Export</h2>
-                 <button id="export-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-300 text-lg" disabled>Export to CSV</button>
+        <!-- Data Grid -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">2. Extracted Products & Modifiers</h2>
+                <div class="flex gap-2">
+                    <button id="add-item-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-1.5 rounded-lg text-sm font-medium transition-all">+ Add Product</button>
+                    <button id="clear-all-btn" class="text-rose-600 hover:bg-rose-50 px-4 py-1.5 rounded-lg text-sm font-medium transition-all">Clear All</button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse min-w-[1000px]">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 text-[11px] font-bold uppercase tracking-widest border-b border-slate-200">
+                            <th class="px-4 py-3 w-16 text-center">Code</th>
+                            <th class="px-4 py-3 w-64">Product Name</th>
+                            <th class="px-4 py-3 w-40">Category</th>
+                            <th class="px-4 py-3 w-32">Base Price</th>
+                            <th class="px-4 py-3 w-48">Modifier Group</th>
+                            <th class="px-4 py-3 w-48">Option</th>
+                            <th class="px-4 py-3 w-24">Extra</th>
+                            <th class="px-4 py-3 w-24">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="extraction-table-body" class="divide-y divide-slate-100 text-sm">
+                        <!-- Items injected here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="empty-state" class="py-20 text-center">
+                <div class="mb-4 text-slate-300 flex justify-center">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+                <p class="text-slate-500 font-medium">No data yet. Upload a menu to start.</p>
             </div>
         </div>
-    </div>
 
-    <div id="confirmation-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div id="confirmation-modal" class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-auto transform transition-all scale-95 opacity-0">
-            <h3 id="confirmation-modal-title" class="text-lg font-bold text-gray-900">Confirm Action</h3>
-            <p id="confirmation-modal-message" class="mt-2 text-sm text-gray-600">Are you sure?</p>
-            <div class="mt-6 flex justify-end space-x-3">
-                <button id="confirmation-modal-cancel-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Cancel</button>
-                <button id="confirmation-modal-confirm-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Confirm</button>
+    </main>
+
+    <!-- Simple Custom Modal -->
+    <div id="modal-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <h3 id="modal-title" class="text-lg font-bold text-slate-900 mb-2">Are you sure?</h3>
+            <p id="modal-desc" class="text-slate-600 mb-6">This action cannot be undone.</p>
+            <div class="flex justify-end gap-3">
+                <button id="modal-cancel" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-all">Cancel</button>
+                <button id="modal-confirm" class="px-4 py-2 bg-rose-600 text-white font-bold rounded-lg hover:bg-rose-700 shadow-sm shadow-rose-200 transition-all">Delete Everything</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        // --- PDF.js Setup ---
-        import * as pdfjsLib from '[https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs](https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs)';
+        import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs';
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs`;
 
-        // --- State ---
-        let extractedData = [];
-        let sessionHistory = [];
-        const API_KEY = "YAIzaSyBW3QyNrmL5_EGOa-ks35Hb0Ea8dMKcy2c"; // REPLACE THIS WITH A VALID KEY
+        const apiKey = "AIzaSyBW3QyNrmL5_EGOa-ks35Hb0Ea8dMKcy2c"; // Provided by execution environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'menu-extractor-v2';
 
-        // --- DOM ---
-        const dom = {
-            uploadBox: document.getElementById('upload-box'),
-            fileInput: document.getElementById('file-input'),
-            statusEl: document.getElementById('status'),
-            dataTable: document.getElementById('data-table'),
-            exportBtn: document.getElementById('export-btn'),
-            addProductBtn: document.getElementById('add-product-btn'),
-            clearListBtn: document.getElementById('clear-list-btn'),
-            deleteSelectedProductsBtn: document.getElementById('delete-selected-products-btn'),
-            selectAllCheckbox: document.getElementById('select-all-checkbox'),
-            sessionHistoryList: document.getElementById('session-history-list'),
-            confirmationModalBackdrop: document.getElementById('confirmation-modal-backdrop'),
-            confirmationModal: document.getElementById('confirmation-modal'),
-            confirmationModalTitle: document.getElementById('confirmation-modal-title'),
-            confirmationModalMessage: document.getElementById('confirmation-modal-message'),
-            confirmationModalCancelBtn: document.getElementById('confirmation-modal-cancel-btn'),
-            confirmationModalConfirmBtn: document.getElementById('confirmation-modal-confirm-btn'),
-        };
+        // --- State Management ---
+        let products = [];
+        let sessions = [];
 
-        // --- Handlers ---
-        dom.fileInput.addEventListener('change', (e) => handleFileBatch(e.target.files));
-        dom.uploadBox.addEventListener('dragover', (e) => { e.preventDefault(); dom.uploadBox.classList.add('dragover'); });
-        dom.uploadBox.addEventListener('dragleave', () => dom.uploadBox.classList.remove('dragover'));
-        dom.uploadBox.addEventListener('drop', (e) => { e.preventDefault(); dom.uploadBox.classList.remove('dragover'); handleFileBatch(e.dataTransfer.files); });
-        
-        async function handleFileBatch(files) {
-            if (!files || files.length === 0) return;
-            resetUI();
-            extractedData = [];
+        // --- DOM Elements ---
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const statusText = document.getElementById('status-text');
+        const statusBar = document.getElementById('status-bar');
+        const tableBody = document.getElementById('extraction-table-body');
+        const emptyState = document.getElementById('empty-state');
+        const exportBtn = document.getElementById('export-btn');
+        const clearAllBtn = document.getElementById('clear-all-btn');
+        const addItemBtn = document.getElementById('add-item-btn');
+        const historyList = document.getElementById('history-list');
 
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                dom.statusEl.textContent = `Processing ${file.name}...`;
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalConfirm = document.getElementById('modal-confirm');
+
+        // --- Init ---
+        function init() {
+            loadSessions();
+            renderTable();
+            renderHistory();
+        }
+
+        // --- Extraction Logic ---
+        async function handleFiles(files) {
+            if (!files.length) return;
+            
+            showStatus(true, "Initializing AI models...");
+            products = []; // Reset current work
+
+            for (let file of files) {
                 if (file.type === 'application/pdf') {
-                    await processPdf(file);
+                    await processPDF(file);
                 } else if (file.type.startsWith('image/')) {
-                    await processImageFile(file);
+                    await processImage(file);
                 }
             }
-            
-            saveNewSession(files.length);
-            dom.statusEl.textContent = `Processing complete.`;
+
+            saveSession();
+            showStatus(false);
             renderTable();
         }
-        
-        function resetUI() {
-            dom.dataTable.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-gray-500"><div class="loader mx-auto"></div></td></tr>';
-            updateButtonStates();
+
+        async function processPDF(file) {
+            try {
+                showStatus(true, `Reading PDF: ${file.name}`);
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    showStatus(true, `Converting page ${i}/${pdf.numPages}...`);
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                    
+                    showStatus(true, `AI Analyzing page ${i}...`);
+                    await extractFromAI(base64, 'image/jpeg');
+                }
+            } catch (err) {
+                console.error("PDF Error", err);
+                showStatus(true, "Error processing PDF. Try images.");
+            }
         }
 
-        async function processImageData(base64ImageData, mimeType, sourceName) {
-            const prompt = `Analyze this menu. Return a JSON array of products. Structure: {productCode, productName, productCategory, basePrice, printer, modifiers: [{modifierName, modifierType, options: [{modifierOption, additionalPrice}]}]}. If multiple prices exist for sizes, set basePrice to lowest and use a "Size" modifier.`;
+        async function processImage(file) {
+            showStatus(true, `Reading Image: ${file.name}`);
+            const reader = new FileReader();
+            const base64Promise = new Promise(resolve => {
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(file);
+            });
+            const base64 = await base64Promise;
+            showStatus(true, `AI Analyzing ${file.name}...`);
+            await extractFromAI(base64, file.type);
+        }
+
+        async function extractFromAI(base64, mimeType) {
+            const systemPrompt = `Analyze restaurant menu images. Return a JSON object with a 'products' array.
+            Structure: {
+                "products": [{
+                    "code": "A1",
+                    "name": "Noodle (English/Chinese)",
+                    "category": "Mains",
+                    "price": 15.50,
+                    "modifiers": [{
+                        "name": "Add-ons",
+                        "options": [
+                            {"item": "Egg", "extra": 2.00},
+                            {"item": "Beef", "extra": 5.00}
+                        ]
+                    }]
+                }]
+            }
+            Rule: If a product has multiple sizes (S/M/L) or prices without labels, set the 'price' to the lowest value and create a "Size" modifier with the price difference in 'extra'.`;
 
             const payload = {
-                contents: [{ parts: [{ text: prompt }, { inlineData: { mime_type: mimeType, data: base64ImageData } }] }],
-                generationConfig: { "response_mime_type": "application/json" }
+                contents: [{
+                    parts: [
+                        { text: "Extract all items from this menu page into structured JSON." },
+                        { inlineData: { mimeType, data: base64 } }
+                    ]
+                }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { responseMimeType: "application/json" }
             };
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                const result = await response.json();
-                if (result.error) throw new Error(result.error.message);
-                
-                const rawText = result.candidates[0].content.parts[0].text;
-                // Clean markdown if AI included it despite config
-                const cleanedText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-                const data = JSON.parse(cleanedText);
-                
-                extractedData.push(...data.map(p => ({ ...p, selected: false, modifiers: p.modifiers || [] })));
-                renderTable(); // Render as we go
-            } catch (error) {
-                console.error("AI Error:", error);
-                dom.statusEl.textContent = "Error: " + error.message;
-            }
-        }
-        
-        async function processImageFile(file) {
-            const base64 = await toBase64(file);
-            await processImageData(base64, file.type, file.name);
-        }
-
-        async function processPdf(file) {
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    dom.statusEl.textContent = `Reading PDF page ${i}/${pdf.numPages}...`;
-                    const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 2.0 });
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    const base64 = canvas.toDataURL('image/jpeg').split(',')[1];
-                    await processImageData(base64, 'image/jpeg', `page ${i}`);
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                    const parsed = JSON.parse(text);
+                    if (parsed.products) {
+                        products.push(...parsed.products);
+                    }
                 }
-            } catch (error) {
-                console.error("PDF Error:", error);
+            } catch (err) {
+                console.error("AI Error", err);
             }
         }
 
-        const toBase64 = file => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = e => reject(e);
-        });
-
-        // --- Table Logic ---
+        // --- Rendering Logic ---
         function renderTable() {
-            dom.dataTable.innerHTML = '';
-            if (extractedData.length === 0) {
-                dom.dataTable.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-gray-500">No data.</td></tr>';
-                updateButtonStates();
+            tableBody.innerHTML = '';
+            
+            if (products.length === 0) {
+                emptyState.classList.remove('hidden');
+                exportBtn.disabled = true;
                 return;
             }
 
-            extractedData.forEach((product, pIdx) => {
-                const rows = product.modifiers.reduce((acc, m) => acc + (m.options.length || 1), 0) || 1;
-                let firstRow = true;
+            emptyState.classList.add('hidden');
+            exportBtn.disabled = false;
 
-                if (product.modifiers.length === 0) {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="p-2 border-b text-center"><input type="checkbox" class="product-checkbox" data-p="${pIdx}" ${product.selected ? 'checked' : ''}></td>
-                        <td class="p-2 border-b"><div contenteditable="true" data-f="productCode" data-p="${pIdx}">${product.productCode || ''}</div></td>
-                        <td class="p-2 border-b"><div contenteditable="true" data-f="productName" data-p="${pIdx}">${product.productName || ''}</div></td>
-                        <td class="p-2 border-b"><div contenteditable="true" data-f="productCategory" data-p="${pIdx}">${product.productCategory || ''}</div></td>
-                        <td class="p-2 border-b"><div contenteditable="true" data-f="basePrice" data-p="${pIdx}">${product.basePrice || ''}</div></td>
-                        <td class="p-2 border-b"><div contenteditable="true" data-f="printer" data-p="${pIdx}">${product.printer || ''}</div></td>
-                        <td colspan="4" class="p-2 border-b"></td>
-                        <td class="p-2 border-b"><button class="add-modifier-btn text-blue-600" data-p="${pIdx}">+ Mod</button></td>
-                    `;
-                    dom.dataTable.appendChild(tr);
+            products.forEach((p, pIdx) => {
+                const modifiersCount = p.modifiers?.length || 0;
+                let totalRowsNeeded = 0;
+                
+                if (modifiersCount === 0) {
+                    totalRowsNeeded = 1;
                 } else {
-                    product.modifiers.forEach((mod, mIdx) => {
-                        mod.options.forEach((opt, oIdx) => {
-                            const tr = document.createElement('tr');
-                            let html = '';
-                            if (firstRow) {
-                                html += `
-                                    <td class="p-2 border-b text-center" rowspan="${rows}"><input type="checkbox" class="product-checkbox" data-p="${pIdx}" ${product.selected ? 'checked' : ''}></td>
-                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="productCode" data-p="${pIdx}">${product.productCode || ''}</div></td>
-                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="productName" data-p="${pIdx}">${product.productName || ''}</div></td>
-                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="productCategory" data-p="${pIdx}">${product.productCategory || ''}</div></td>
-                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="basePrice" data-p="${pIdx}">${product.basePrice || ''}</div></td>
-                                    <td class="p-2 border-b" rowspan="${rows}"><div contenteditable="true" data-f="printer" data-p="${pIdx}">${product.printer || ''}</div></td>
-                                `;
-                            }
-                            html += `
-                                <td class="p-2 border-b sub-row-cell"><div contenteditable="true" data-f="modifierName" data-p="${pIdx}" data-m="${mIdx}">${mod.modifierName || ''}</div></td>
-                                <td class="p-2 border-b"><div contenteditable="true" data-f="modifierType" data-p="${pIdx}" data-m="${mIdx}">${mod.modifierType || ''}</div></td>
-                                <td class="p-2 border-b"><div contenteditable="true" data-f="modifierOption" data-p="${pIdx}" data-m="${mIdx}" data-o="${oIdx}">${opt.modifierOption || ''}</div></td>
-                                <td class="p-2 border-b"><div contenteditable="true" data-f="additionalPrice" data-p="${pIdx}" data-m="${mIdx}" data-o="${oIdx}">${opt.additionalPrice || '0'}</div></td>
-                                <td class="p-2 border-b">
-                                    ${firstRow ? `<button class="add-modifier-btn text-xs text-blue-600" data-p="${pIdx}">+M</button>` : ''}
-                                    <button class="add-option-btn text-xs text-green-600" data-p="${pIdx}" data-m="${mIdx}">+O</button>
-                                </td>
-                            `;
-                            tr.innerHTML = html;
-                            dom.dataTable.appendChild(tr);
-                            firstRow = false;
+                    p.modifiers.forEach(m => {
+                        totalRowsNeeded += (m.options?.length || 1);
+                    });
+                }
+
+                let rowNum = 0;
+                const modifiers = p.modifiers || [];
+
+                if (modifiers.length === 0) {
+                    tableBody.appendChild(createRow(p, pIdx, null, null, totalRowsNeeded, 0));
+                } else {
+                    modifiers.forEach((m, mIdx) => {
+                        const options = m.options || [null];
+                        options.forEach((opt, oIdx) => {
+                            tableBody.appendChild(createRow(p, pIdx, m, opt, totalRowsNeeded, rowNum, mIdx, oIdx));
+                            rowNum++;
                         });
                     });
                 }
             });
-            updateButtonStates();
         }
 
-        // --- Persistence & UI Helpers ---
-        function updateButtonStates() {
-            const hasData = extractedData.length > 0;
-            dom.exportBtn.disabled = !hasData;
-            dom.clearListBtn.disabled = !hasData;
-            dom.addProductBtn.disabled = false;
-            dom.deleteSelectedProductsBtn.disabled = !extractedData.some(p => p.selected);
+        function createRow(p, pIdx, mod, opt, totalRows, rowNum, mIdx, oIdx) {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition-colors group";
+
+            // If it's the first row for this product, add product-level cells with rowspan
+            if (rowNum === 0) {
+                tr.innerHTML = `
+                    <td rowspan="${totalRows}" class="px-4 py-3 align-top border-r border-slate-100 bg-white group-hover:bg-slate-50">
+                        <div contenteditable="true" onblur="updateValue(${pIdx}, 'code', this.innerText)" class="font-mono text-xs text-indigo-600 font-bold">${p.code || '-'}</div>
+                    </td>
+                    <td rowspan="${totalRows}" class="px-4 py-3 align-top border-r border-slate-100 bg-white group-hover:bg-slate-50">
+                        <div contenteditable="true" onblur="updateValue(${pIdx}, 'name', this.innerText)" class="font-semibold text-slate-900">${p.name || ''}</div>
+                    </td>
+                    <td rowspan="${totalRows}" class="px-4 py-3 align-top border-r border-slate-100 bg-white group-hover:bg-slate-50">
+                        <div contenteditable="true" onblur="updateValue(${pIdx}, 'category', this.innerText)" class="text-xs text-slate-500 uppercase font-medium">${p.category || ''}</div>
+                    </td>
+                    <td rowspan="${totalRows}" class="px-4 py-3 align-top border-r border-slate-100 bg-white group-hover:bg-slate-50">
+                        <div contenteditable="true" onblur="updateValue(${pIdx}, 'price', this.innerText)" class="text-slate-900 font-medium">RM ${typeof p.price === 'number' ? p.price.toFixed(2) : (p.price || '0.00')}</div>
+                    </td>
+                `;
+            }
+
+            // Modifier specific cells
+            const modName = mod ? mod.name : '';
+            const optName = opt ? opt.item : '';
+            const optExtra = opt ? opt.extra : '';
+
+            tr.innerHTML += `
+                <td class="px-4 py-3 text-slate-600 font-medium">
+                    <div contenteditable="true" onblur="updateModValue(${pIdx}, ${mIdx}, 'name', this.innerText)">${modName}</div>
+                </td>
+                <td class="px-4 py-3 text-slate-600">
+                    <div contenteditable="true" onblur="updateOptValue(${pIdx}, ${mIdx}, ${oIdx}, 'item', this.innerText)">${optName}</div>
+                </td>
+                <td class="px-4 py-3 text-slate-500 italic">
+                    <div contenteditable="true" onblur="updateOptValue(${pIdx}, ${mIdx}, ${oIdx}, 'extra', this.innerText)">${optExtra !== '' ? 'RM ' + optExtra : ''}</div>
+                </td>
+                <td class="px-4 py-3 text-right">
+                    <button onclick="removeLine(${pIdx}, ${mIdx}, ${oIdx})" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 transition-all p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </td>
+            `;
+
+            return tr;
         }
 
-        dom.dataTable.addEventListener('input', (e) => {
-            const { f, p, m, o } = e.target.dataset;
-            let val = e.target.textContent;
-            if (o !== undefined) extractedData[p].modifiers[m].options[o][f] = val;
-            else if (m !== undefined) extractedData[p].modifiers[m][f] = val;
-            else extractedData[p][f] = val;
-        });
+        // --- Helpers & UI ---
+        function showStatus(show, text = "") {
+            statusBar.classList.toggle('hidden', !show);
+            statusText.innerText = text;
+        }
 
-        dom.dataTable.addEventListener('click', (e) => {
-            const btn = e.target;
-            const { p, m } = btn.dataset;
-            if (btn.classList.contains('add-modifier-btn')) {
-                extractedData[p].modifiers.push({ modifierName: 'New Mod', modifierType: 'Single', options: [{ modifierOption: 'New Opt', additionalPrice: 0 }] });
-                renderTable();
-            } else if (btn.classList.contains('add-option-btn')) {
-                extractedData[p].modifiers[m].options.push({ modifierOption: 'New Opt', additionalPrice: 0 });
-                renderTable();
+        window.updateValue = (pIdx, field, value) => {
+            if (field === 'price') {
+                products[pIdx][field] = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
+            } else {
+                products[pIdx][field] = value;
             }
-        });
+        };
 
-        dom.dataTable.addEventListener('change', (e) => {
-            if (e.target.classList.contains('product-checkbox')) {
-                extractedData[e.target.dataset.p].selected = e.target.checked;
-                updateButtonStates();
+        window.updateModValue = (pIdx, mIdx, field, value) => {
+            if (mIdx === undefined || isNaN(mIdx)) return;
+            products[pIdx].modifiers[mIdx][field] = value;
+        };
+
+        window.updateOptValue = (pIdx, mIdx, oIdx, field, value) => {
+            if (mIdx === undefined || isNaN(mIdx) || oIdx === undefined || isNaN(oIdx)) return;
+            if (field === 'extra') {
+                products[pIdx].modifiers[mIdx].options[oIdx][field] = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
+            } else {
+                products[pIdx].modifiers[mIdx].options[oIdx][field] = value;
             }
-        });
+        };
 
-        dom.exportBtn.addEventListener('click', () => {
-            let csv = "Code,Product,Category,Price,Printer,Modifier,Type,Option,AddPrice\n";
-            extractedData.forEach(p => {
-                const base = `"${p.productCode}","${p.productName}","${p.productCategory}","${p.basePrice}","${p.printer}"`;
-                if (p.modifiers.length === 0) csv += base + ",,,,\n";
-                else p.modifiers.forEach(m => m.options.forEach(o => {
-                    csv += `${base},"${m.modifierName}","${m.modifierType}","${o.modifierOption}","${o.additionalPrice}"\n`;
-                }));
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'menu.csv';
-            a.click();
-        });
+        window.removeLine = (pIdx, mIdx, oIdx) => {
+            if (mIdx === undefined || isNaN(mIdx)) {
+                // Delete whole product
+                products.splice(pIdx, 1);
+            } else if (oIdx === undefined || isNaN(oIdx)) {
+                // Delete whole modifier
+                products[pIdx].modifiers.splice(mIdx, 1);
+            } else {
+                // Delete specific option
+                products[pIdx].modifiers[mIdx].options.splice(oIdx, 1);
+                // If modifier is empty, delete it
+                if (products[pIdx].modifiers[mIdx].options.length === 0) {
+                    products[pIdx].modifiers.splice(mIdx, 1);
+                }
+            }
+            renderTable();
+        };
 
-        function saveNewSession() {
-            if (extractedData.length === 0) return;
-            const session = { id: Date.now(), name: new Date().toLocaleString(), data: JSON.parse(JSON.stringify(extractedData)), itemCount: extractedData.length };
-            sessionHistory.unshift(session);
-            localStorage.setItem('menuSessions', JSON.stringify(sessionHistory.slice(0, 5)));
+        // --- Persistence ---
+        function saveSession() {
+            if (products.length === 0) return;
+            const session = {
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                count: products.length,
+                data: JSON.parse(JSON.stringify(products))
+            };
+            sessions.unshift(session);
+            sessions = sessions.slice(0, 10);
+            localStorage.setItem(`${appId}_sessions`, JSON.stringify(sessions));
             renderHistory();
         }
 
-        function renderHistory() {
-            const saved = localStorage.getItem('menuSessions');
-            sessionHistory = saved ? JSON.parse(saved) : [];
-            dom.sessionHistoryList.innerHTML = sessionHistory.map(s => `
-                <div class="p-2 border rounded flex justify-between items-center">
-                    <span class="text-xs font-medium">${s.name} (${s.itemCount})</span>
-                    <button onclick="window.loadSess(${s.id})" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Load</button>
-                </div>
-            `).join('') || '<p class="text-center text-gray-400">No history</p>';
+        function loadSessions() {
+            const raw = localStorage.getItem(`${appId}_sessions`);
+            if (raw) sessions = JSON.parse(raw);
         }
 
-        window.loadSess = (id) => {
-            const s = sessionHistory.find(x => x.id === id);
-            if (s) { extractedData = s.data; renderTable(); }
+        function renderHistory() {
+            historyList.innerHTML = '';
+            if (sessions.length === 0) {
+                historyList.innerHTML = '<p class="text-slate-400 text-sm italic">No recent sessions found.</p>';
+                return;
+            }
+
+            sessions.forEach(s => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-all cursor-pointer group";
+                div.onclick = () => {
+                    products = JSON.parse(JSON.stringify(s.data));
+                    renderTable();
+                };
+                div.innerHTML = `
+                    <div class="overflow-hidden">
+                        <p class="text-[11px] font-bold text-slate-800 truncate">${s.date}</p>
+                        <p class="text-[10px] text-slate-500">${s.count} items extracted</p>
+                    </div>
+                    <button class="p-1 text-slate-300 group-hover:text-rose-400 hover:bg-rose-50 rounded" onclick="event.stopPropagation(); deleteSession(${s.id})">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                `;
+                historyList.appendChild(div);
+            });
+        }
+
+        window.deleteSession = (id) => {
+            sessions = sessions.filter(s => s.id !== id);
+            localStorage.setItem(`${appId}_sessions`, JSON.stringify(sessions));
+            renderHistory();
         };
 
-        renderHistory();
+        // --- Events ---
+        dropZone.onclick = () => fileInput.click();
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('drag-active'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag-active');
+        dropZone.ondrop = (e) => { e.preventDefault(); dropZone.classList.remove('drag-active'); handleFiles(e.dataTransfer.files); };
+        fileInput.onchange = (e) => handleFiles(e.target.files);
+
+        addItemBtn.onclick = () => {
+            products.unshift({
+                code: "NEW",
+                name: "New Product",
+                category: "Category",
+                price: 0,
+                modifiers: [{ name: "Size", options: [{ item: "Regular", extra: 0 }] }]
+            });
+            renderTable();
+        };
+
+        clearAllBtn.onclick = () => {
+            modalOverlay.classList.remove('hidden');
+            modalConfirm.onclick = () => {
+                products = [];
+                renderTable();
+                modalOverlay.classList.add('hidden');
+            };
+        };
+
+        modalCancel.onclick = () => modalOverlay.classList.add('hidden');
+
+        exportBtn.onclick = () => {
+            let csv = "Code,Name,Category,Base Price,Modifier Group,Option Item,Extra Price\n";
+            products.forEach(p => {
+                const base = `"${p.code}","${p.name}","${p.category}","${p.price}"`;
+                if (!p.modifiers || p.modifiers.length === 0) {
+                    csv += `${base},"","",""\n`;
+                } else {
+                    p.modifiers.forEach(m => {
+                        m.options.forEach(o => {
+                            csv += `${base},"${m.name}","${o.item}","${o.extra}"\n`;
+                        });
+                    });
+                }
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `extracted_menu_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        init();
     </script>
 </body>
 </html>
